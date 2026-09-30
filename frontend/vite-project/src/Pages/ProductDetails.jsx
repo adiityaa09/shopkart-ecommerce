@@ -6,8 +6,9 @@ import NavBar from "../components/NavBar";
 function ProductDetails() {
     const { id } = useParams();
     const [product, setProduct] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [loadedProductId, setLoadedProductId] = useState(null);
+    const loading = loadedProductId !== id;
     const [quantity, setQuantity] = useState(1);
     const [addedToast, setAddedToast] = useState(false);
     const [currentUser, setCurrentUser] = useState(null);
@@ -20,13 +21,12 @@ function ProductDetails() {
 
     useEffect(() => {
         let isMounted = true;
-        setLoading(true);
-        setError("");
 
         api.get(`/products/${id}`)
             .then((response) => {
                 if (isMounted) {
                     setProduct(response.data.product || response.data);
+                    setError("");
                 }
             })
             .catch((err) => {
@@ -40,7 +40,7 @@ function ProductDetails() {
             })
             .finally(() => {
                 if (isMounted) {
-                    setLoading(false);
+                    setLoadedProductId(id);
                 }
             });
 

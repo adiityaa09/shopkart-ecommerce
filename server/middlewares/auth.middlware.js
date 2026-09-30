@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import Customer from "../models/customer.model.js";
 
+
 const authMiddleware = async (req, res, next) => {
     try {
         const token = req.cookies.token;
@@ -16,6 +17,7 @@ const authMiddleware = async (req, res, next) => {
 
         const customer = await Customer.findById(decoded.customerID);
 
+        
         if (!customer) {
             return res.status(401).json({
                 success: false,
@@ -24,9 +26,8 @@ const authMiddleware = async (req, res, next) => {
         }
 
         req.user = customer;
-
         next();
-
+    
     } catch (error) {
         return res.status(401).json({
             success: false,

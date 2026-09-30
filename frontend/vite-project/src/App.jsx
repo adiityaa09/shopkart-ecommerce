@@ -5,6 +5,7 @@ import Register from "./Pages/Register";
 import Home from "./Pages/Home";
 import Products from "./Pages/Products";
 import ProductDetails from "./Pages/ProductDetails";
+import Wishlist from "./Pages/Wishlist";
 
 function App() {
     return (
@@ -42,6 +43,12 @@ function App() {
                 <Route
                     path="/products/:id"
                     element={<ProductDetails />}
+                />
+
+                {/* Wishlist */}
+                <Route
+                    path="/wishlist"
+                    element={<Wishlist />}
                 />
 
                 {/* Catch-all fallback */}

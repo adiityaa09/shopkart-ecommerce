@@ -49,6 +49,7 @@ const registerCustomer = async (req, res) => {
             }
         });
     }
+    
 catch (error) {
     console.log("ERROR:", error);
 
@@ -123,9 +124,28 @@ const getMyProfile = async (req, res) => {
     });
 };
 
+const logoutCustomer = async (req, res) => {
+    try {
+        res.clearCookie("token", {
+            httpOnly: true,
+            secure: false
+        });
+        return res.status(200).json({
+            success: true,
+            message: "Logged out successfully"
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to logout"
+        });
+    }
+};
+
 export {
     registerCustomer,
     loginCustomer,
-    getMyProfile
+    getMyProfile,
+    logoutCustomer
 };
 

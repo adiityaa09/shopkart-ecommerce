@@ -54,6 +54,16 @@ function NavBar({ user = null }) {
                             >
                                 Products
                             </Link>
+                            <Link
+                                to="/wishlist"
+                                className={`px-3 py-2 rounded-lg text-sm font-semibold transition ${
+                                    isActive("/wishlist")
+                                        ? "bg-blue-50 text-blue-700"
+                                        : "text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+                                }`}
+                            >
+                                Wishlist
+                            </Link>
                         </nav>
                     </div>
 
@@ -95,6 +105,14 @@ function NavBar({ user = null }) {
                     }`}
                 >
                     Products
+                </Link>
+                <Link
+                    to="/wishlist"
+                    className={`text-xs font-semibold px-3 py-1.5 rounded-md ${
+                        isActive("/wishlist") ? "bg-blue-100 text-blue-700" : "text-gray-600"
+                    }`}
+                >
+                    Wishlist
                 </Link>
             </div>
         </header>

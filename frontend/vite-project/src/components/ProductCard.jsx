@@ -1,6 +1,10 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { addToWishlist } from "../Services/api";
 
 function ProductCard({ product }) {
+    const [wishStatus, setWishStatus] = useState("idle"); 
+
     const formatPrice = (price) => {
         return new Intl.NumberFormat("en-IN", {
             style: "currency",
@@ -10,6 +14,29 @@ function ProductCard({ product }) {
     };
 
     const isOutOfStock = product.stock <= 0;
+
+    const handleWishlist = async () => {
+        if (wishStatus === "saving" || wishStatus === "saved") return;
+
+        setWishStatus("saving");
+        try {
+            await addToWishlist(product._id);
+            setWishStatus("saved");
+        } catch (err) {
+            if (err.response?.status === 409) {
+                setWishStatus("saved"); // already in wishlist
+            } else {
+                setWishStatus("error");
+            }
+        }
+    };
+
+    const wishLabel = {
+        idle: "♡ Add to Wishlist",
+        saving: "⏳ Saving...",
+        saved: "♥ Added to Wishlist",
+        error: "♡ Add to Wishlist",
+    }[wishStatus];
 
     return (
         <div className="group bg-white rounded-2xl border border-gray-200/80 shadow-sm hover:shadow-md hover:border-blue-200 transition flex flex-col overflow-hidden">
@@ -61,6 +88,24 @@ function ProductCard({ product }) {
                     >
                         View Details
                     </Link>
+
+                    <button
+                        onClick={handleWishlist}
+                        disabled={wishStatus === "saving" || wishStatus === "saved"}
+                        className={`mt-2 w-full py-2.5 px-4 text-sm font-semibold rounded-xl border transition
+                            ${wishStatus === "saved"
+                                ? "bg-pink-50 text-pink-600 border-pink-200 cursor-default"
+                                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"}
+                            disabled:opacity-70`}
+                    >
+                        {wishLabel}
+                    </button>
+
+                    {wishStatus === "error" && (
+                        <p className="mt-2 text-xs text-red-500">
+                            Unable to save product. Please try again.
+                        </p>
+                    )}
                 </div>
             </div>
         </div>

@@ -6,11 +6,14 @@ import SearchBar from "../components/SearchBar";
 
 function Products() {
     const [products, setProducts] = useState([]);
-    const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("");
     const [currentUser, setCurrentUser] = useState(null);
+    const [loadedRequestKey, setLoadedRequestKey] = useState(null);
+    const [reloadKey, setReloadKey] = useState(0);
+    const requestKey = JSON.stringify([searchTerm.trim(), selectedCategory.trim(), reloadKey]);
+    const loading = loadedRequestKey !== requestKey;
 
     useEffect(() => {
         api.get("/customers/me")
@@ -20,8 +23,6 @@ function Products() {
 
     useEffect(() => {
         let isMounted = true;
-        setLoading(true);
-        setError("");
 
         const params = {};
         if (searchTerm.trim()) {
@@ -35,6 +36,7 @@ function Products() {
             .then((response) => {
                 if (isMounted) {
                     setProducts(response.data.products || []);
+                    setError("");
                 }
             })
             .catch((err) => {
@@ -45,14 +47,14 @@ function Products() {
             })
             .finally(() => {
                 if (isMounted) {
-                    setLoading(false);
+                    setLoadedRequestKey(requestKey);
                 }
             });
 
         return () => {
             isMounted = false;
         };
-    }, [searchTerm, selectedCategory]);
+    }, [searchTerm, selectedCategory, reloadKey, requestKey]);
 
     const handleClearFilters = () => {
         setSearchTerm("");
@@ -105,17 +107,8 @@ function Products() {
                         <button
                             type="button"
                             onClick={() => {
-                                setLoading(true);
                                 setError("");
-                                api.get("/products", {
-                                    params: {
-                                        ...(searchTerm && { search: searchTerm }),
-                                        ...(selectedCategory && { category: selectedCategory })
-                                    }
-                                })
-                                    .then((res) => setProducts(res.data.products || []))
-                                    .catch(() => setError("Something went wrong while loading products."))
-                                    .finally(() => setLoading(false));
+                                setReloadKey((currentKey) => currentKey + 1);
                             }}
                             className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-lg transition"
                         >
