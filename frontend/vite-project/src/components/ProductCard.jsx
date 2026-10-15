@@ -1,33 +1,20 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { addToWishlist } from "../Services/api";
+import { useCart } from "../Context/CartContext";
 
 function ProductCard({ product }) {
-    const [wishStatus, setWishStatus] = useState("idle"); 
-
-    const formatPrice = (price) => {
-        return new Intl.NumberFormat("en-IN", {
-            style: "currency",
-            currency: "INR",
-            maximumFractionDigits: 0
-        }).format(price);
-    };
-
-    const isOutOfStock = product.stock <= 0;
+    // ----- wishlist (Lab 4) -----
+    const [wishStatus, setWishStatus] = useState("idle"); // idle | saving | saved | error
 
     const handleWishlist = async () => {
         if (wishStatus === "saving" || wishStatus === "saved") return;
-
         setWishStatus("saving");
         try {
             await addToWishlist(product._id);
             setWishStatus("saved");
         } catch (err) {
-            if (err.response?.status === 409) {
-                setWishStatus("saved"); // already in wishlist
-            } else {
-                setWishStatus("error");
-            }
+            setWishStatus(err.response?.status === 409 ? "saved" : "error");
         }
     };
 
@@ -38,9 +25,31 @@ function ProductCard({ product }) {
         error: "♡ Add to Wishlist",
     }[wishStatus];
 
+    // ----- cart (Lab 5) -----
+    const { addToCart, cartItems, pendingIds } = useCart();
+    const [cartError, setCartError] = useState("");
+
+    const adding = pendingIds.includes(product._id);
+    const inCart = cartItems.some((item) => item.product._id === product._id);
+
+    const handleAddToCart = async () => {
+        setCartError("");
+        const result = await addToCart(product._id);
+        if (!result.ok) setCartError(result.message);
+    };
+
+    // ----- display -----
+    const formatPrice = (price) =>
+        new Intl.NumberFormat("en-IN", {
+            style: "currency",
+            currency: "INR",
+            maximumFractionDigits: 0,
+        }).format(price);
+
+    const isOutOfStock = product.stock <= 0;
+
     return (
         <div className="group bg-white rounded-2xl border border-gray-200/80 shadow-sm hover:shadow-md hover:border-blue-200 transition flex flex-col overflow-hidden">
-            {/* Image Container */}
             <div className="relative aspect-square w-full bg-gray-100 overflow-hidden">
                 <img
                     src={product.image}
@@ -61,7 +70,6 @@ function ProductCard({ product }) {
                 )}
             </div>
 
-            {/* Content Body */}
             <div className="p-5 flex-1 flex flex-col justify-between">
                 <div>
                     <h3 className="font-bold text-gray-900 text-base line-clamp-1 group-hover:text-blue-600 transition">
@@ -92,20 +100,25 @@ function ProductCard({ product }) {
                     <button
                         onClick={handleWishlist}
                         disabled={wishStatus === "saving" || wishStatus === "saved"}
-                        className={`mt-2 w-full py-2.5 px-4 text-sm font-semibold rounded-xl border transition
+                        className={`mt-2 w-full py-2.5 px-4 text-sm font-semibold rounded-xl border transition disabled:opacity-70
                             ${wishStatus === "saved"
                                 ? "bg-pink-50 text-pink-600 border-pink-200 cursor-default"
-                                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"}
-                            disabled:opacity-70`}
+                                : "bg-white text-gray-700 border-gray-300 hover:bg-gray-50"}`}
                     >
                         {wishLabel}
                     </button>
-
                     {wishStatus === "error" && (
-                        <p className="mt-2 text-xs text-red-500">
-                            Unable to save product. Please try again.
-                        </p>
+                        <p className="mt-2 text-xs text-red-500">Unable to save product. Please try again.</p>
                     )}
+
+                    <button
+                        onClick={handleAddToCart}
+                        disabled={adding || isOutOfStock}
+                        className="mt-2 w-full py-2.5 px-4 text-sm font-semibold rounded-xl bg-gray-900 hover:bg-gray-800 text-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {isOutOfStock ? "Out of Stock" : adding ? "Adding..." : inCart ? "Add Another" : "Add to Cart"}
+                    </button>
+                    {cartError && <p className="mt-2 text-xs text-red-500">{cartError}</p>}
                 </div>
             </div>
         </div>
