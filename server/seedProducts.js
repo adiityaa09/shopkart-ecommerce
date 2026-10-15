@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import Product from "./models/product.model.js";
+import { pathToFileURL } from "node:url";
 
 dotenv.config();
 
-const sampleProducts = [
+export const sampleProducts = [
     {
         name: "Mechanical Keyboard",
         description: "RGB mechanical keyboard with blue switches, tactile feedback, and durable aluminum frame.",
@@ -100,4 +101,6 @@ const seedDB = async () => {
     }
 };
 
-seedDB();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+    seedDB();
+}

@@ -1,5 +1,5 @@
 import express from "express";
-import authMiddleware from "../middlewares/auth.middlware.js";
+import authMiddleware from "../middlewares/auth.middleware.js";
 import {
   addToWishlist,
   getWishlist,
